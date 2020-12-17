@@ -1,0 +1,5 @@
+{
+    "python.pythonPath": "datasets/env/bin/python",
+    "python.formatting.provider": "black",
+    "git.ignoreLimitWarning": true
+}

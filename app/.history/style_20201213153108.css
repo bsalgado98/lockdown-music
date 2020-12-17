@@ -1,0 +1,73 @@
+::-webkit-scrollbar {
+    display: none;
+}
+body {
+    margin: 0px;
+    /* background: linear-gradient(270deg, #ffd166, #073b4c);
+    -webkit-animation: TextContainerGradient 7s ease infinite;
+    -moz-animation: TextContainerGradient 7s ease infinite;
+    animation: TextContainerGradient 7s ease infinite; */
+}
+.App {
+    text-align: center;
+    font-family: Helvetica;
+    /* margin: 0; */
+    /* background-color: #073b4c; */
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    color: #ef476f;
+    font-weight: lighter;
+    font-size: 24px;
+    /* border-bottom: 4px solid; */
+    /* background: linear-gradient(to right, #118ab2 , #ffd166); */
+} 
+.Intro {
+    padding: 20%;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    text-align: left;
+    justify-content: center;
+}
+.DataContainer {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+}
+.GraphContainer {
+    width: 70%;
+    margin: 2%;
+} 
+.TextContainer {
+    width: 30%;
+    padding: 5%;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    text-align: left;
+    justify-content: center;
+}
+#app {
+    width: 60%;
+}
+#kepler-map {
+    /* margin-left: 10vw; */
+    padding: 0;
+    width: 63%;
+}
+@-webkit-keyframes TextContainerGradient {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@-moz-keyframes TextContainerGradient {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@keyframes TextContainerGradient {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}

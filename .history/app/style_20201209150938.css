@@ -1,0 +1,54 @@
+::-webkit-scrollbar {
+    display: none;
+}
+body {
+    margin: 0px;
+}
+.App {
+    text-align: center;
+    font-family: Helvetica;
+    /* margin: 0; */
+    background-color: #073b4c;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    color: #ef476f;
+    font-weight: lighter;
+    font-size: 24px;
+} 
+.Intro {
+    padding: 20%;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    text-align: left;
+    justify-content: center;
+}
+.DataContainer {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+.GraphContainer {
+    width: 70%;
+    padding: 5%;
+} 
+.TextContainer {
+    background-color: #073b4c;
+    width: 40%;
+    padding: 50;
+    border-left: 4px solid #06d6a0;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    text-align: left;
+    justify-content: center;
+}
+#app {
+    width: 60%;
+}
+#kepler-map {
+    margin: 0;
+    padding: 0;
+    width: 70%;
+}

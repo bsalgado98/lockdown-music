@@ -1,0 +1,32 @@
+body {
+    margin: 0px;
+}
+.App {
+    text-align: center;
+    font-family: Helvetica;
+    /* margin: 0; */
+    background-color: #073b4c;
+    color: #ef476f;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+}
+  
+  /* const data1Container = {
+    display: 'flex',
+    width: '100vw',
+    height: '100vh'
+  }
+  
+  const data1DataContainer = {
+    flexGrow: 1,
+    borderRadius: '4px',
+    borderColor: LIGHT_BLUE
+  }
+  
+  const data1TextContainer = {
+    backgroundColor: LIGHT_BLUE,
+    flexGrow: 1,
+    textAlign: "center",
+    alignItems: "center"
+  } */

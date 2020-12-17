@@ -1,0 +1,39 @@
+body {
+    margin: 0px;
+    ::-webkit-scrollbar {
+        display: none;
+    }
+}
+.App {
+    text-align: center;
+    font-family: Helvetica;
+    /* margin: 0; */
+    background-color: #073b4c;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+} 
+.DataContainer {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+.GraphContainer {
+    width: 70%;
+    padding: 50;
+    border-radius: 4px;
+} 
+.TextContainer {
+    background-color: #073b4c;
+    width: 30%;
+    padding: 50;
+    display: flex;
+    flex-direction: column;
+    font-weight: lighter;
+    font-size: 24px;
+    border-left: 4px solid #06d6a0;
+    color: #ef476f;
+    flex-grow: 1;
+    text-align: left;
+    justify-content: center;
+}

@@ -1,0 +1,24 @@
+{
+    "id": "9BFE3C4A",
+    "path": "~/Desktop/lockdown-music/app/datasets/convert_csv_to_json.R",
+    "project_path": "convert_csv_to_json.R",
+    "type": "r_source",
+    "hash": "3953597444",
+    "contents": "",
+    "dirty": false,
+    "created": 1607489837429.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "cursorPosition": "11,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1607813027,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1607813027058,
+    "read_only": false,
+    "read_only_alternatives": []
+}

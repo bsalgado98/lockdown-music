@@ -1,0 +1,253 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/uber-fonts/4.0.0/superfine.css">
+
+  <!--MapBox css-->
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.1/mapbox-gl.css" rel="stylesheet">
+
+  <!-- facebook open graph tags -->
+  <meta property="og:url" content="http://kepler.gl/" />
+  <meta property="og:title" content="Large-scale WebGL-powered Geospatial Data Visualization Tool" />
+  <meta property="og:description"
+    content="Kepler.gl is a powerful web-based geospatial data analysis tool. Built on a high performance rendering engine and designed for large-scale data sets." />
+  <meta property="og:site_name" content="kepler.gl" />
+  <meta property="og:image" content="https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/kepler.gl-meta-tag.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="800" />
+  <meta property="og:image:height" content="800" />
+
+  <!-- twitter card tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@uber">
+  <meta name="twitter:creator" content="@uber">
+  <meta name="twitter:title" content="Large-scale WebGL-powered Geospatial Data Visualization Tool">
+  <meta name="twitter:description"
+    content="Kepler.gl is a powerful web-based geospatial data analysis tool. Built on a high performance rendering engine and designed for large-scale data sets.">
+  <meta name="twitter:image" content="https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/kepler.gl-meta-tag.png" />
+
+  <!-- Load React/Redux -->
+  <script src="https://unpkg.com/react@16.8.4/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@16.8.4/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/redux@3.7.2/dist/redux.js" crossorigin></script>
+  <script src="https://unpkg.com/react-redux@7.1.3/dist/react-redux.min.js" crossorigin></script>
+  <script src="https://unpkg.com/styled-components@4.1.3/dist/styled-components.min.js" crossorigin></script>
+
+  <!-- Load Kepler.gl -->
+  <script src="https://unpkg.com/kepler.gl@2.4.0/umd/keplergl.min.js" crossorigin></script>
+
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datasource@0.1.0"></script>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+  <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+</head>
+
+<body>
+  <div class="App">
+    <div class="Intro">
+      <h1 style="font-size: 150px; border: 8px dashed #ef476f">Lockdown <br /> Music.</h1>
+      <p style="color: #ffd166">A visualization of the effects of COVID-19 on the music industry.</p>
+    </div>
+  </div>
+  <div class="App">
+    <div class="DataContainer">
+      <div class="GraphContainer">
+        <canvas id="yearVsLoudness" height="100%" width="60vw"></canvas>
+        <p style="color: #ffd166; font-size: 14px">The overall loudness of a track in decibels (dB). Loudness values are
+          averaged across the entire track and are useful for comparing relative loudness of tracks. Loudness is the
+          quality of a sound that is the primary psychological correlate of physical strength (amplitude).</p>
+        <canvas id="yearVsDance" height="100%" width="60vw"></canvas>
+        <p style="color: #ffd166; font-size: 14px">Danceability describes how suitable a track is for dancing based on a
+          combination of
+          musical elements
+          including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable
+          and 1.0 is most danceable.</p>
+      </div>
+      <div class="TextContainer">
+        <p>The progression of music <strong>loudness</strong> and <strong>danceability</strong> over the years gives
+          insight into what people are valuing in their music choice.</p>
+        <p>At times when the U.S. was undergoing various crises such as the <strong>2007-2008 financial crisis</strong>
+          and the <strong>2020
+            COVID-19 global pandemic</strong>, these two attributes suddenly became more favorable on the charts.</p>
+      </div>
+    </div>
+  </div>
+  <div class="App">
+    <div class="DataContainer">
+      <div class="GraphContainer" id="kepler-map">
+        <!--MapBox token-->
+        <script>
+          /**
+           * Provide your MapBox Token
+           **/
+          const MAPBOX_TOKEN = 'pk.eyJ1IjoidWJlcmRhdGEiLCJhIjoiY2p5aHB5bzEzMDI3MjNucWx4dmhvbW5wYyJ9.ZjLMWjog4imdrZhtheCOtA';
+          const WARNING_MESSAGE = 'Please Provide a Mapbox Token in order to use Kepler.gl. Edit this file and fill out MAPBOX_TOKEN with your access key';
+        </script>
+        <!-- We will put our React component inside this div. -->
+        <div id="app">
+          <!-- Kepler.gl map will be placed here-->
+        </div>
+
+        <!-- Load our React component. -->
+        <script>
+          /* Validate Mapbox Token */
+          if ((MAPBOX_TOKEN || '') === '' || MAPBOX_TOKEN === 'PROVIDE_MAPBOX_TOKEN') {
+            alert(WARNING_MESSAGE);
+          }
+
+          /** STORE **/
+          const reducers = (function createReducers(redux, keplerGl) {
+            return redux.combineReducers({
+              // mount keplerGl reducer
+              keplerGl: keplerGl.keplerGlReducer.initialState({
+                uiState: {
+                  readOnly: true,
+                  currentModal: null
+                }
+              })
+            });
+          }(Redux, KeplerGl));
+
+          const middleWares = (function createMiddlewares(keplerGl) {
+            return keplerGl.enhanceReduxMiddleware([
+              // Add other middlewares here
+            ]);
+          }(KeplerGl));
+
+          const enhancers = (function craeteEnhancers(redux, middles) {
+            return redux.applyMiddleware(...middles);
+          }(Redux, middleWares));
+
+          const store = (function createStore(redux, enhancers) {
+            const initialState = {};
+
+            return redux.createStore(
+              reducers,
+              initialState,
+              redux.compose(enhancers)
+            );
+          }(Redux, enhancers));
+          /** END STORE **/
+
+          /** COMPONENTS **/
+          var KeplerElement = (function makeKeplerElement(react, keplerGl, mapboxToken) {
+            var LogoSvg = function LogoSvg() {
+              return react.createElement(
+                "div",
+                { className: "logo-container" },
+                react.createElement(
+                  "svg",
+                  {
+                    className: "kepler_gl__logo",
+                    width: "107px",
+                    height: "21px",
+                    viewBox: "0 0 124 24"
+                  },
+                  react.createElement(
+                    "g",
+                    { transform: "translate(13.500000, 13.500000) rotate(45.000000) translate(-13.500000, -13.500000) translate(4.000000, 4.000000)" },
+                    react.createElement("rect", { x: "0", y: "6", transform: "matrix(2.535181e-06 1 -1 2.535181e-06 18.1107 6.0369)", fill: "#535C6C", width: "12.1", height: "12.1" }),
+                    react.createElement("rect", { x: "6", y: "0", transform: "matrix(2.535182e-06 1 -1 2.535182e-06 18.1107 -6.0369)", fill: "#1FBAD6", width: "12.1", height: "12.1" })
+                  ),
+                  react.createElement(
+                    "g",
+                    {},
+                    react.createElement("path", { fill: "#1FBAD6", d: "M39,8.7h2.2l-2.8,4.2l2.9,5.1H39l-2.4-4.2h-1.3V18h-2V5l2-0.1v7.3h1.3L39,8.7z" }),
+                    react.createElement("path", { fill: "#1FBAD6", d: "M42.4,13.3c0-1.5,0.4-2.7,1.1-3.5s1.8-1.2,3.1-1.2c1.3,0,2.2,0.4,2.8,1.1c0.6,0.7,0.9,1.8,0.9,3.3 c0,0.4,0,0.8,0,1.1h-5.8c0,1.6,0.8,2.4,2.4,2.4c1,0,2-0.2,2.9-0.6l0.2,1.7c-0.4,0.2-0.9,0.4-1.4,0.5s-1.1,0.2-1.7,0.2 c-1.5,0-2.6-0.4-3.3-1.2C42.8,16.1,42.4,14.9,42.4,13.3z M46.6,10.1c-0.7,0-1.2,0.2-1.5,0.5c-0.4,0.4-0.6,0.9-0.6,1.7h4 c0-0.8-0.2-1.4-0.5-1.7S47.2,10.1,46.6,10.1z" }),
+                    react.createElement("path", { fill: "#1FBAD6", d: "M57.1,18.2c-1,0-1.8-0.3-2.3-0.9l0,0l0,1.3v2.5h-2V8.7h1.5l0.3,0.9h0c0.3-0.3,0.7-0.6,1.2-0.7 c0.4-0.2,0.9-0.3,1.4-0.3c1.2,0,2.1,0.4,2.7,1.1c0.6,0.7,0.9,2,0.9,3.7c0,1.6-0.3,2.8-1,3.7C59.2,17.8,58.3,18.2,57.1,18.2z M56.7,10.3c-0.4,0-0.8,0.1-1.1,0.2c-0.3,0.2-0.6,0.4-0.8,0.7v4.3c0.2,0.3,0.4,0.5,0.7,0.7c0.3,0.2,0.7,0.3,1.1,0.3 c0.7,0,1.2-0.2,1.6-0.7c0.4-0.5,0.5-1.3,0.5-2.5c0-0.8-0.1-1.4-0.2-1.8s-0.4-0.7-0.7-0.9C57.6,10.4,57.2,10.3,56.7,10.3z" }),
+                    react.createElement("path", { fill: "#1FBAD6", d: "M63.2,16V5l2-0.1v10.8c0,0.3,0.1,0.5,0.2,0.6c0.1,0.1,0.3,0.2,0.6,0.2c0.3,0,0.6,0,0.9-0.1V18 c-0.4,0.1-1,0.2-1.6,0.2c-0.8,0-1.3-0.2-1.7-0.5S63.2,16.8,63.2,16z" }),
+                    react.createElement("path", { fill: "#1FBAD6", d: "M68.2,13.3c0-1.5,0.4-2.7,1.1-3.5c0.7-0.8,1.8-1.2,3.1-1.2c1.3,0,2.2,0.4,2.8,1.1c0.6,0.7,0.9,1.8,0.9,3.3 c0,0.4,0,0.8,0,1.1h-5.8c0,1.6,0.8,2.4,2.4,2.4c1,0,2-0.2,2.9-0.6l0.2,1.7c-0.4,0.2-0.9,0.4-1.4,0.5s-1.1,0.2-1.7,0.2 c-1.5,0-2.6-0.4-3.3-1.2C68.6,16.1,68.2,14.9,68.2,13.3z M72.4,10.1c-0.7,0-1.2,0.2-1.5,0.5c-0.4,0.4-0.6,0.9-0.6,1.7h4 c0-0.8-0.2-1.4-0.5-1.7S73,10.1,72.4,10.1z" }),
+                    react.createElement("path", { fill: "#1FBAD6", d: "M80.2,8.7l0.1,1.7h0c0.3-0.6,0.7-1.1,1.1-1.4c0.4-0.3,1-0.5,1.6-0.5c0.4,0,0.7,0,1,0.1l-0.1,2 c-0.3-0.1-0.7-0.2-1-0.2c-0.7,0-1.3,0.3-1.7,0.8c-0.4,0.5-0.7,1.2-0.7,2.1V18h-2V8.7H80.2z" }),
+                    react.createElement("path", { fill: "#1FBAD6", d: "M83.8,17c0-0.8,0.4-1.2,1.2-1.2c0.8,0,1.2,0.4,1.2,1.2c0,0.8-0.4,1.1-1.2,1.1C84.2,18.2,83.8,17.8,83.8,17z" }),
+                    react.createElement("path", { fill: "#1FBAD6", d: "M88.5,18.7c0-0.8,0.4-1.4,1.2-1.8c-0.6-0.3-0.9-0.8-0.9-1.5c0-0.7,0.4-1.2,1.1-1.6c-0.3-0.3-0.6-0.6-0.7-0.9 c-0.2-0.4-0.2-0.8-0.2-1.3c0-1,0.3-1.8,0.9-2.3c0.6-0.5,1.6-0.8,2.8-0.8c0.5,0,1,0,1.4,0.1c0.4,0.1,0.8,0.2,1.1,0.4l2.4-0.2v1.5 h-1.5c0.2,0.4,0.2,0.8,0.2,1.3c0,1-0.3,1.7-0.9,2.2s-1.5,0.8-2.7,0.8c-0.7,0-1.2-0.1-1.6-0.2c-0.1,0.1-0.2,0.2-0.3,0.3 c-0.1,0.1-0.1,0.2-0.1,0.4c0,0.2,0.1,0.3,0.2,0.4c0.1,0.1,0.3,0.2,0.6,0.2l2.7,0.2c1,0.1,1.7,0.3,2.2,0.6c0.5,0.3,0.8,0.9,0.8,1.7 c0,0.6-0.2,1.1-0.5,1.5c-0.4,0.4-0.9,0.8-1.5,1c-0.7,0.2-1.5,0.4-2.4,0.4c-1.3,0-2.3-0.2-3-0.6C88.8,20.1,88.5,19.5,88.5,18.7z M95.1,18.4c0-0.3-0.1-0.5-0.3-0.7s-0.6-0.2-1.1-0.3l-2.7-0.3c-0.2,0.1-0.4,0.3-0.5,0.5c-0.1,0.2-0.2,0.4-0.2,0.6 c0,0.4,0.2,0.8,0.5,1c0.4,0.2,1,0.3,1.8,0.3C94.2,19.5,95.1,19.2,95.1,18.4z M94.3,11.5c0-0.6-0.1-1-0.4-1.2 c-0.3-0.2-0.7-0.3-1.3-0.3c-0.7,0-1.1,0.1-1.4,0.3c-0.3,0.2-0.4,0.6-0.4,1.2s0.1,1,0.4,1.2c0.3,0.2,0.7,0.3,1.4,0.3 c0.6,0,1.1-0.1,1.3-0.4S94.3,12,94.3,11.5z" }),
+                    react.createElement("path", { fill: "#1FBAD6", d: "M99.4,16V5l2-0.1v10.8c0,0.3,0.1,0.5,0.2,0.6c0.1,0.1,0.3,0.2,0.6,0.2c0.3,0,0.6,0,0.9-0.1V18 c-0.4,0.1-1,0.2-1.6,0.2c-0.8,0-1.3-0.2-1.7-0.5S99.4,16.8,99.4,16z" })
+                  )
+                )
+              );
+            };
+
+            return function App() {
+              var rootElm = react.useRef(null);
+              var _useState = react.useState({
+                width: document.getElementById('kepler-map').style.width,
+                height: document.getElementById('kepler-map').style.height
+              });
+              var windowDimension = _useState[0];
+              var setDimension = _useState[1];
+              // react.useEffect(function sideEffect() {
+              //   function handleResize() {
+              //     setDimension({ width: window.innerWidth, height: window.innerHeight });
+              //   };
+              //   window.addEventListener('resize', handleResize);
+              //   return function () { window.removeEventListener('resize', handleResize); };
+              // }, []);
+              return react.createElement(
+                'div',
+                { style: { position: 'unset', width: '80vw', height: '80vh' } },
+                LogoSvg(),
+                react.createElement(keplerGl.KeplerGl, {
+                  mapboxApiAccessToken: mapboxToken,
+                  id: "map",
+                  width: windowDimension.width,
+                  height: windowDimension.height
+                })
+              )
+            }
+          }(React, KeplerGl, MAPBOX_TOKEN));
+
+          const app = (function createReactReduxProvider(react, reactRedux, KeplerElement) {
+            return react.createElement(
+              reactRedux.Provider,
+              { store },
+              react.createElement(KeplerElement, null)
+            )
+          }(React, ReactRedux, KeplerElement));
+          /** END COMPONENTS **/
+
+          /** Render **/
+          (function render(react, reactDOM, app) {
+            reactDOM.render(app, document.getElementById('app'));
+          }(React, ReactDOM, app));
+        </script>
+        <!-- The next script will show how to interact directly with Kepler map store -->
+        <script>
+          /**
+           * Customize map.
+           * In the following section you can use the store object to dispatch Kepler.gl actions
+           * to add new data and customize behavior
+           */
+          (function customize(keplerGl, store) {
+            const datasets = [{ "version": "v1", "data": { "id": "rmv22gf0g", "label": "capitals.json", "color": [143, 47, 191], "allData": [[{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-86.279118, 32.361538] }, "properties": { "state": "Alabama", "name": "Montgomery", "genre": "Country", "artist": "Kevin Gates", "index": 0 } }, "Alabama", "Montgomery", "Country", "Kevin Gates"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-134.41974, 58.301935] }, "properties": { "state": "Alaska", "name": "Juneau", "genre": "Country", "artist": "Eminem", "index": 1 } }, "Alaska", "Juneau", "Country", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-112.073844, 33.448457] }, "properties": { "state": "Arizona", "name": "Phoenix", "genre": "Metal", "artist": "Drake", "index": 2 } }, "Arizona", "Phoenix", "Metal", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-92.331122, 34.736009] }, "properties": { "state": "Arkansas", "name": "Little Rock", "genre": "Country", "artist": "Kevin Gates", "index": 3 } }, "Arkansas", "Little Rock", "Country", "Kevin Gates"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-121.468926, 38.555605] }, "properties": { "state": "California", "name": "Sacramento", "genre": "Pop", "artist": "Kevin Gates", "index": 4 } }, "California", "Sacramento", "Pop", "Kevin Gates"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-104.984167, 39.7391667] }, "properties": { "state": "Colorado", "name": "Denver", "genre": "Indie", "artist": "Drake", "index": 5 } }, "Colorado", "Denver", "Indie", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-72.677, 41.767] }, "properties": { "state": "Connecticut", "name": "Hartford", "genre": "Metal", "artist": "Drake", "index": 6 } }, "Connecticut", "Hartford", "Metal", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-75.526755, 39.161921] }, "properties": { "state": "Delaware", "name": "Dover", "genre": "Classic Rock", "artist": "Drake", "index": 7 } }, "Delaware", "Dover", "Classic Rock", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-84.27277, 30.4518] }, "properties": { "state": "Florida", "name": "Tallahassee", "genre": "Alternative", "artist": "Drake", "index": 8 } }, "Florida", "Tallahassee", "Alternative", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-84.39, 33.76] }, "properties": { "state": "Georgia", "name": "Atlanta", "genre": "Classic Rock", "artist": "Future", "index": 9 } }, "Georgia", "Atlanta", "Classic Rock", "Future"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-157.826182, 21.30895] }, "properties": { "state": "Hawaii", "name": "Honolulu", "genre": "R&B", "artist": "Bruno Mars", "index": 10 } }, "Hawaii", "Honolulu", "R&B", "Bruno Mars"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-116.237651, 43.613739] }, "properties": { "state": "Idaho", "name": "Boise", "genre": "Country", "artist": "Eminem", "index": 11 } }, "Idaho", "Boise", "Country", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-89.650373, 39.78325] }, "properties": { "state": "Illinois", "name": "Springfield", "genre": "Classic Rock", "artist": "Drake", "index": 12 } }, "Illinois", "Springfield", "Classic Rock", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-86.147685, 39.790942] }, "properties": { "state": "Indiana", "name": "Indianapolis", "genre": "Classic Rock", "artist": "Drake", "index": 13 } }, "Indiana", "Indianapolis", "Classic Rock", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-93.620866, 41.590939] }, "properties": { "state": "Iowa", "name": "Des Moines", "genre": "Indie", "artist": "Drake", "index": 14 } }, "Iowa", "Des Moines", "Indie", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-95.69, 39.04] }, "properties": { "state": "Kansas", "name": "Topeka", "genre": "Metal", "artist": "Drake", "index": 15 } }, "Kansas", "Topeka", "Metal", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-84.86311, 38.197274] }, "properties": { "state": "Kentucky", "name": "Frankfort", "genre": "Classic Rock", "artist": "Kevin Gates", "index": 16 } }, "Kentucky", "Frankfort", "Classic Rock", "Kevin Gates"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-91.140229, 30.45809] }, "properties": { "state": "Louisiana", "name": "Baton Rouge", "genre": "Classic Rock", "artist": "Kevin Gates", "index": 17 } }, "Louisiana", "Baton Rouge", "Classic Rock", "Kevin Gates"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-69.765261, 44.323535] }, "properties": { "state": "Maine", "name": "Augusta", "genre": "Alternative", "artist": "Eminem", "index": 18 } }, "Maine", "Augusta", "Alternative", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-76.501157, 38.972945] }, "properties": { "state": "Maryland", "name": "Annapolis", "genre": "Indie", "artist": "Drake", "index": 19 } }, "Maryland", "Annapolis", "Indie", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-71.0275, 42.2352] }, "properties": { "state": "Massachusetts", "name": "Boston", "genre": "Indie", "artist": "Drake", "index": 20 } }, "Massachusetts", "Boston", "Indie", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-84.5467, 42.7335] }, "properties": { "state": "Michigan", "name": "Lansing", "genre": "Classic Rock", "artist": "Drake", "index": 21 } }, "Michigan", "Lansing", "Classic Rock", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-93.094, 44.95] }, "properties": { "state": "Minnesota", "name": "Saint Paul", "genre": "Indie", "artist": "Drake", "index": 22 } }, "Minnesota", "Saint Paul", "Indie", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-90.207, 32.32] }, "properties": { "state": "Mississippi", "name": "Jackson", "genre": "Classic Rock", "artist": "Kevin Gates", "index": 23 } }, "Mississippi", "Jackson", "Classic Rock", "Kevin Gates"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-92.189283, 38.572954] }, "properties": { "state": "Missouri", "name": "Jefferson City", "genre": "Classic Rock", "artist": "Drake", "index": 24 } }, "Missouri", "Jefferson City", "Classic Rock", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-112.027031, 46.595805] }, "properties": { "state": "Montana", "name": "Helena", "genre": "Alternative", "artist": "Eminem", "index": 25 } }, "Montana", "Helena", "Alternative", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-96.675345, 40.809868] }, "properties": { "state": "Nebraska", "name": "Lincoln", "genre": "Country", "artist": "Drake", "index": 26 } }, "Nebraska", "Lincoln", "Country", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-119.753877, 39.160949] }, "properties": { "state": "Nevada", "name": "Carson City", "genre": "Electronic", "artist": "Drake", "index": 27 } }, "Nevada", "Carson City", "Electronic", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-71.549127, 43.220093] }, "properties": { "state": "New Hampshire", "name": "Concord", "genre": "Country", "artist": "Eminem", "index": 28 } }, "New Hampshire", "Concord", "Country", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-74.756138, 40.221741] }, "properties": { "state": "New Jersey", "name": "Trenton", "genre": "Classic Rock", "artist": "Drake", "index": 29 } }, "New Jersey", "Trenton", "Classic Rock", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-105.964575, 35.667231] }, "properties": { "state": "New Mexico", "name": "Santa Fe", "genre": "Alternative", "artist": "Drake", "index": 30 } }, "New Mexico", "Santa Fe", "Alternative", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-73.781339, 42.659829] }, "properties": { "state": "New York", "name": "Albany", "genre": "Classic Rock", "artist": "Drake", "index": 31 } }, "New York", "Albany", "Classic Rock", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-78.638, 35.771] }, "properties": { "state": "North Carolina", "name": "Raleigh", "genre": "Indie", "artist": "Drake", "index": 32 } }, "North Carolina", "Raleigh", "Indie", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-100.779004, 48.813343] }, "properties": { "state": "North Dakota", "name": "Bismarck", "genre": "Metal", "artist": "Eminem", "index": 33 } }, "North Dakota", "Bismarck", "Metal", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-83.000647, 39.962245] }, "properties": { "state": "Ohio", "name": "Columbus", "genre": "Country", "artist": "Drake", "index": 34 } }, "Ohio", "Columbus", "Country", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-97.534994, 35.482309] }, "properties": { "state": "Oklahoma", "name": "Oklahoma City", "genre": "Metal", "artist": "Drake", "index": 35 } }, "Oklahoma", "Oklahoma City", "Metal", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-123.029159, 44.931109] }, "properties": { "state": "Oregon", "name": "Salem", "genre": "Alternative", "artist": "Drake", "index": 36 } }, "Oregon", "Salem", "Alternative", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-76.875613, 40.269789] }, "properties": { "state": "Pennsylvania", "name": "Harrisburg", "genre": "Country", "artist": "Drake", "index": 37 } }, "Pennsylvania", "Harrisburg", "Country", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-71.422132, 41.82355] }, "properties": { "state": "Rhode Island", "name": "Providence", "genre": "Indie", "artist": "Drake", "index": 38 } }, "Rhode Island", "Providence", "Indie", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-81.035, 34] }, "properties": { "state": "South Carolina", "name": "Columbia", "genre": "Classic Rock", "artist": "Kevin Gates", "index": 39 } }, "South Carolina", "Columbia", "Classic Rock", "Kevin Gates"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-100.336378, 44.367966] }, "properties": { "state": "South Dakota", "name": "Pierre", "genre": "Metal", "artist": "Eminem", "index": 40 } }, "South Dakota", "Pierre", "Metal", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-86.784, 36.165] }, "properties": { "state": "Tennessee", "name": "Nashville", "genre": "Indie", "artist": "Kevin Gates", "index": 41 } }, "Tennessee", "Nashville", "Indie", "Kevin Gates"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-97.75, 30.266667] }, "properties": { "state": "Texas", "name": "Austin", "genre": "Latin", "artist": "Drake", "index": 42 } }, "Texas", "Austin", "Latin", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-111.892622, 40.7547] }, "properties": { "state": "Utah", "name": "Salt Lake City", "genre": "Country", "artist": "Eminem", "index": 43 } }, "Utah", "Salt Lake City", "Country", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-72.57194, 44.26639] }, "properties": { "state": "Vermont", "name": "Montpelier", "genre": "Indie", "artist": "Eminem", "index": 44 } }, "Vermont", "Montpelier", "Indie", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-77.46, 37.54] }, "properties": { "state": "Virginia", "name": "Richmond", "genre": "Indie", "artist": "Eminem", "index": 45 } }, "Virginia", "Richmond", "Indie", "Eminem"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-122.893077, 47.042418] }, "properties": { "state": "Washington", "name": "Olympia", "genre": "Country", "artist": "Drake", "index": 46 } }, "Washington", "Olympia", "Country", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-81.633294, 38.349497] }, "properties": { "state": "West Virginia", "name": "Charleston", "genre": "Country", "artist": "Drake", "index": 47 } }, "West Virginia", "Charleston", "Country", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-89.384444, 43.074722] }, "properties": { "state": "Wisconsin", "name": "Madison", "genre": "Country", "artist": "Drake", "index": 48 } }, "Wisconsin", "Madison", "Country", "Drake"], [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-104.802042, 41.145548] }, "properties": { "state": "Wyoming", "name": "Cheyenne", "genre": "Indie", "artist": "Eminem", "index": 49 } }, "Wyoming", "Cheyenne", "Indie", "Eminem"]], "fields": [{ "name": "_geojson", "type": "geojson", "format": "", "analyzerType": "GEOMETRY" }, { "name": "state", "type": "string", "format": "", "analyzerType": "STRING" }, { "name": "name", "type": "string", "format": "", "analyzerType": "STRING" }, { "name": "genre", "type": "string", "format": "", "analyzerType": "STRING" }, { "name": "artist", "type": "string", "format": "", "analyzerType": "STRING" }] } }];
+            const config = { "version": "v1", "config": { "visState": { "filters": [], "layers": [{ "id": "9ti9qd9g", "type": "geojson", "config": { "dataId": "rmv22gf0g", "label": "popular genre", "color": [255, 203, 153], "columns": { "geojson": "_geojson" }, "isVisible": true, "visConfig": { "opacity": 0.83, "strokeOpacity": 0.8, "thickness": 2.6, "strokeColor": [27, 18, 71], "colorRange": { "name": "Ice And Fire", "type": "diverging", "category": "Uber", "colors": ["#0198BD", "#49E3CE", "#E8FEB5", "#FEEDB1", "#FEAD54", "#D50255"] }, "strokeColorRange": { "name": "Global Warming", "type": "sequential", "category": "Uber", "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"] }, "radius": 30.5, "sizeRange": [0, 10], "radiusRange": [0, 50], "heightRange": [0, 500], "elevationScale": 5, "stroked": false, "filled": true, "enable3d": false, "wireframe": false }, "hidden": false, "textLabel": [{ "field": null, "color": [255, 255, 255], "size": 18, "offset": [0, 0], "anchor": "start", "alignment": "center" }] }, "visualChannels": { "colorField": { "name": "genre", "type": "string" }, "colorScale": "ordinal", "strokeColorField": null, "strokeColorScale": "quantile", "sizeField": null, "sizeScale": "linear", "heightField": null, "heightScale": "linear", "radiusField": null, "radiusScale": "linear" } }, { "id": "l4xq03", "type": "geojson", "config": { "dataId": "rmv22gf0g", "label": "popular artist", "color": [18, 92, 119], "columns": { "geojson": "_geojson" }, "isVisible": true, "visConfig": { "opacity": 0.8, "strokeOpacity": 0.8, "thickness": 2.6, "strokeColor": null, "colorRange": { "name": "Global Warming", "type": "sequential", "category": "Uber", "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"] }, "strokeColorRange": { "name": "ColorBrewer Paired-6", "type": "qualitative", "category": "ColorBrewer", "colors": ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c"] }, "radius": 50.6, "sizeRange": [0, 10], "radiusRange": [0, 50], "heightRange": [0, 500], "elevationScale": 5, "stroked": true, "filled": false, "enable3d": false, "wireframe": false }, "hidden": false, "textLabel": [{ "field": null, "color": [255, 255, 255], "size": 18, "offset": [0, 0], "anchor": "start", "alignment": "center" }] }, "visualChannels": { "colorField": null, "colorScale": "quantile", "strokeColorField": { "name": "artist", "type": "string" }, "strokeColorScale": "ordinal", "sizeField": null, "sizeScale": "linear", "heightField": null, "heightScale": "linear", "radiusField": null, "radiusScale": "linear" } }], "interactionConfig": { "tooltip": { "fieldsToShow": { "rmv22gf0g": [{ "name": "state", "format": null }, { "name": "name", "format": null }, { "name": "genre", "format": null }, { "name": "artist", "format": null }] }, "compareMode": false, "compareType": "absolute", "enabled": true }, "brush": { "size": 0.5, "enabled": false }, "geocoder": { "enabled": false }, "coordinate": { "enabled": false } }, "layerBlending": "normal", "splitMaps": [], "animationConfig": { "currentTime": null, "speed": 1 } }, "mapState": { "bearing": 0, "dragRotate": false, "latitude": 37.46231902434289, "longitude": -94.85804881485736, "pitch": 0, "zoom": 3.821772684848719, "isSplit": false }, "mapStyle": { "styleType": "dark", "topLayerGroups": {}, "visibleLayerGroups": { "label": true, "road": false, "border": true, "building": false, "water": true, "land": true, "3d building": false }, "threeDBuildingColor": [9.665468314072013, 17.18305478057247, 31.1442867897876], "mapStyles": {} } } };
+
+            const loadedData = keplerGl.KeplerGlSchema.load(
+              datasets,
+              config
+            );
+
+            store.dispatch(keplerGl.addDataToMap({
+              datasets: loadedData.datasets,
+              config: loadedData.config,
+              options: {
+                centerMap: false
+              }
+            }));
+          }(KeplerGl, store))
+        </script>
+      </div>
+      <div class="TextContainer">
+        <p>A look at <strong>top genres for live performance</strong> and the most <strong>popular artist</strong>
+          by
+          state helps us to examine the American musical spectrum from another lens.</p>
+        <p>The most popular genre is <strong>country</strong>, yet the most popular artist is
+          <strong>Drake</strong>, a
+          <strong>rap artist</strong>.</p>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="index.js"></script>
+
+</html>
